@@ -13,8 +13,22 @@ class PhotoRepository private  constructor(
 
     fun getPhotosByAlbum(albumId: String) = photoDao.getPhotosByAlbum(albumId)
 
+    fun getAllPhotos() = photoDao.getAllPhotos()
+
+    suspend fun searchPhotos(searchQuery: String): List<Photo> = imgurApi.queryPhotos(searchQuery)
+
     fun savePhoto(photo: Photo) = photoDao.savePhoto(photo)
 
     fun deletePhoto(photo: Photo) = photoDao.deletePhoto(photo)
+
+
+    companion object {
+        @Volatile private var instance: PhotoRepository? = null
+
+        fun getInstance(photoDao: PhotoDao, imgurApi: ImgurApi) =
+            instance ?: synchronized(this) {
+                instance ?: PhotoRepository(photoDao, imgurApi).also { instance = it }
+            }
+    }
 
 }
